@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ using 專題Employee_Version1.services;
 
 public class UserController : Controller
 {
-    private readonly string apiKey = "CWA-52FEB868-8B04-4217-8172-E3172489AF0E";
+    private readonly string apiKey = ConfigurationManager.AppSettings["ApiKey"];
     private readonly string apiUrl = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-007?Authorization=";
     private readonly string jokeUrl = "https://v2.jokeapi.dev/joke/Dark";
     private readonly NewsService _newsService = new NewsService();
