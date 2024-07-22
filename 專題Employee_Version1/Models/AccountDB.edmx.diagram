@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="1270c8f9cf2642edbd8a8e8ef149050c" Name="Diagram1">
+        <EntityTypeShape EntityType="Version3_CustomerModel.Account" Width="1.5" PointX="3" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_CustomerModel.AccountStatu" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_CustomerModel.AccountType" Width="1.5" PointX="0.75" PointY="9" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_CustomerModel.Budget" Width="1.5" PointX="6" PointY="4.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_CustomerModel.Category" Width="1.5" PointX="3.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_CustomerModel.Customer" Width="1.5" PointX="0.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_CustomerModel.Expens" Width="1.5" PointX="8.25" PointY="4.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_CustomerModel.Transaction" Width="1.5" PointX="5.25" PointY="8.375" IsExpanded="true" />
+        <AssociationConnector Association="Version3_CustomerModel.FK__Accounts__Accoun__4CA06362" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_CustomerModel.FK__Accounts__Custom__4BAC3F29" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_CustomerModel.FK__Transacti__Accou__5070F446" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_CustomerModel.FK_Transactions_AccountStatus" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_CustomerModel.FK__Budget__Category__571DF1D5" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_CustomerModel.FK__Budget__Customer__5629CD9C" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_CustomerModel.FK__Expenses__Budget__5BE2A6F2" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_CustomerModel.FK__Expenses__Catego__5DCAEF64" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_CustomerModel.FK__Expenses__Custom__5CD6CB2B" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

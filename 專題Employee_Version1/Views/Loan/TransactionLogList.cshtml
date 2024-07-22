@@ -1,0 +1,42 @@
+﻿@model IEnumerable<專題Employee_Version1.Models.ViewModels.TransactionLogViewModel>
+
+@{
+    ViewBag.Title = "今日還款紀錄";
+}
+
+<div class="container">
+    <h2 class="my-4 text-center">@ViewBag.Title</h2>
+
+    <table class="table table-striped table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">收款帳號</th>
+                <th scope="col">交易日期</th>
+                <th scope="col">金額</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.ActionLink(item.RepaymentAccountNumber, "TransactionLogByAccountNumber", new { accountNumber = item.RepaymentAccountNumber }, new { @class = "text-info" })
+                    </td>
+                    <td>
+                        @item.TransactionDate.ToString("yyyy/MM/dd")
+                    </td>
+                    <td>
+                        @item.Amount.ToString("N0")
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="row mt-4">
+        <div class="col text-end">
+            <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "User")'">回到首頁</button>
+            <button type="button" class="btn btn-primary" onclick="location.href='@Url.Action("MonthlyRepaymentPlan2", "Loan")'">還款計畫查詢</button>
+        </div>
+    </div>
+</div>

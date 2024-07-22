@@ -1,0 +1,37 @@
+﻿
+@{
+    ViewBag.Title = "RepaymentSchedule";
+}
+
+<input type="text"
+       id="emailInput"
+       placeholder="Search ..."
+       class="form-control" />
+
+<div id="repaymentScheduleResult"></div>
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#emailInput').on('input', function () {
+                var email = $(this).val();
+                if (email) {
+                    $.ajax({
+                        url: '@Url.Action("RepaymentSchedule", "YourControllerName")',
+                        type: 'GET',
+                        data: { email: email },
+                        success: function (response) {
+                            $('#repaymentScheduleResult').html(response);
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error occurred: " + error);
+                        }
+                    });
+                } else {
+                    $('#repaymentScheduleResult').empty();
+                }
+            });
+        });
+    </script>
+}

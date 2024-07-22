@@ -1,0 +1,32 @@
+﻿@model IEnumerable<專題Employee_Version1.Models.ViewModels.TransactionLogViewModel>
+
+@{
+    ViewBag.Title = "TransactionLogByAccountNumber";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // 如果有共用布局，可以在這裡設置
+}
+
+<div class="container mt-5">
+    <h2>@ViewBag.RepaymentAccountNumber 還款紀錄</h2>
+
+    <p>已還款金額: @ViewBag.AmountPaid</p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>日期</th>
+                <th>金額</th>
+                @*<th></th>*@
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.TransactionDate)</td>
+                    <td>@item.Amount.ToString("N0")</td>
+                    @*<td>@Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }, new { @class = "btn btn-primary btn-sm" })</td>*@
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

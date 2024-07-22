@@ -1,0 +1,552 @@
+﻿@{
+    ViewBag.Title = "LoanStatic";
+}
+@section Styles{
+    <style>
+        
+        .box {
+            fill: white;
+            stroke: #000000;
+        }
+
+        .median {
+            stroke: #ff0000;
+            stroke-width: 2px;
+        }
+
+        .whisker {
+            stroke: #000000;
+            stroke-width: 1px;
+        }
+
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            width: 80px;
+            height: 28px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+
+
+        .button-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+            .button-container button {
+                margin: 0 10px;
+                padding: 10px 20px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+        .hidden {
+            display: none;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .chart-container, .table-container {
+            margin: 20px;
+        }
+
+        .max-variance {
+            color: red;
+        }
+        
+
+    </style>
+}
+<h2>申請案件利率分析</h2>
+
+
+
+<div class="container">
+    <div class="page-inner">
+        <div class="row">
+            <div class="col-md-6">
+                <div id="interest-container" class="chart-container">
+                    <div id="boxplot"></div>
+
+                </div>
+            </div>
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">利率統計表</div>
+                    </div>
+                    <div id="stats-table-container" class="card-body">
+                        <table id="stats-table" class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>產品名稱</th>
+                                    <th>Q1</th>
+                                    <th>中位數</th>
+                                    <th>Q3</th>
+                                    <th>四分位距IQR</th>
+                                    <th>Min</th>
+                                    <th>Max</th>
+                                    <th>平均數</th>
+                                    <th>變異數</th>
+
+                                </tr>
+                            </thead>
+                            <tbody id="stats-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">申請貸款種類次數</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="LoanCategoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">案件申請次數分佈</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="multipleBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
+
+
+@section scripts{
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+
+        // 定義 getBoxPlotStats 函式
+        function getBoxPlotStats(data) {
+            data = data.sort(d3.ascending);
+            const q1 = d3.quantile(data, 0.25);
+            const median = d3.quantile(data, 0.5);
+            const q3 = d3.quantile(data, 0.75);
+            const interQuantileRange = q3 - q1;
+            const min = Math.max(d3.min(data), q1 - 1.5 * interQuantileRange);
+            const max = Math.min(d3.max(data), q3 + 1.5 * interQuantileRange);
+
+            // 平均數
+            const mean = data.reduce((acc, val) => acc + val, 0) / data.length;
+
+            // 變異數
+            const variance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / data.length;
+
+            return { q1, median, q3, interQuantileRange, min, max, mean, variance, interQuantileRange };
+        }
+
+        $.ajax({
+            url: "/Loan/GetLoanInterestRates",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                // 成功接收到資料後，執行以下處理
+                console.log("成功獲取資料", data[0].TotalLoanCount);
+
+                // 處理資料並更新 D3.js 圖表
+                updateChart("#boxplot", data);
+                // 生成餅圖
+                updatePie(data);
+
+                // 生成表格內容
+                generateTable("#stats-table-body", data);
+            },
+            error: function (xhr, status, error) {
+                // 處理錯誤情況
+                console.error("發生錯誤：", error);
+            }
+        });
+
+        $.ajax({
+            url: "/Loan/GetLoanAmount",
+            type: "GET",
+            dataType: "json",
+            success: function (data2) {
+                // 成功接收到資料後，執行以下處理
+                console.log("成功獲取資料2");
+
+                // 處理資料並更新 D3.js 圖表
+                updateChart("#boxplot2", data2);
+
+                // 生成表格內容
+                generateTable("#stats-table-body2", data2);
+            },
+            error: function (xhr, status, error) {
+                // 處理錯誤情況
+                console.error("發生錯誤：", error);
+            }
+        });
+
+        $.ajax({
+            url: "/Loan/GetLoanCountByMonth",
+            type: "GET",
+            dataType: "json",
+            success: function (data3) {
+                // 成功接收到資料後，執行以下處理
+                console.log("成功獲取資料3:", data3.CatCounts);
+
+
+                // 處理資料並更新
+                updateBarChart(data3);
+
+            },
+            error: function (xhr, status, error) {
+                // 處理錯誤情況
+                console.error("發生錯誤：", error);
+            }
+        });
+
+
+
+        function updateChart(containerId, data) {
+            // 清空現有的 SVG 元素（如果需要重新繪製）
+            d3.select(containerId + " svg").remove();
+
+            // 設定圖表尺寸
+            const margin = { top: 10, right: 30, bottom: 30, left: 40 },
+                width = 800 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
+
+            // 建立 SVG
+            const svg = d3.select(containerId)
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            // 建立 x 軸
+            const x = d3.scaleBand()
+                .range([0, width])
+                .domain(data.map(d => d.LoanProductName))
+                .paddingInner(1)
+                .paddingOuter(0.5);
+
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("dx", "-.8em")
+                .attr("dy", ".15em")
+
+
+            // 建立 y 軸
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data.flatMap(d => d.InterestRates || d.LoanAmounts))])  //flatMap: 降維
+                .range([height, 0]);
+
+            svg.append("g").call(d3.axisLeft(y))
+                .call(d3.axisLeft(y))
+                .selectAll("text")
+                .style("font-size", "12px"); // 设置 y 轴文字大小
+
+            // 建立工具提示
+            const tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            function showTooltip(event, text) {
+                tooltip.transition().duration(200).style("opacity", .9);
+                tooltip.html(text)
+                    .style("left", (event.pageX + 5) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            }
+
+            function hideTooltip() {
+                tooltip.transition().duration(500).style("opacity", 0);
+            }
+
+            data.forEach(d => {
+                const stats = getBoxPlotStats(d.InterestRates || d.LoanAmounts);
+
+                svg.append("rect")
+                    .attr("x", x(d.LoanProductName) - 50)
+                    .attr("y", y(stats.q3))
+                    .attr("height", y(stats.q1) - y(stats.q3))
+                    .attr("width", 100)
+                    .attr("class", "box")
+                    .on("mouseover", function (event) { showTooltip(event, `Q1: ${stats.q1}<br>Q3: ${stats.q3}`); })
+                    .on("mouseout", hideTooltip);
+
+                svg.append("line")
+                    .attr("x1", x(d.LoanProductName) - 50)
+                    .attr("x2", x(d.LoanProductName) + 50)
+                    .attr("y1", y(stats.median))
+                    .attr("y2", y(stats.median))
+                    .attr("class", "median")
+                    .on("mouseover", function (event) { showTooltip(event, `Median: ${stats.median}`); })
+                    .on("mouseout", hideTooltip);
+
+                svg.append("line")
+                    .attr("x1", x(d.LoanProductName))
+                    .attr("x2", x(d.LoanProductName))
+                    .attr("y1", y(stats.min))
+                    .attr("y2", y(stats.max))
+                    .attr("stroke", "black");
+
+                svg.append("line")
+                    .attr("x1", x(d.LoanProductName) - 10)
+                    .attr("x2", x(d.LoanProductName) + 10)
+                    .attr("y1", y(stats.min))
+                    .attr("y2", y(stats.min))
+                    .attr("class", "whisker")
+                    .on("mouseover", function (event) { showTooltip(event, `Min: ${stats.min}`); })
+                    .on("mouseout", hideTooltip);
+
+                svg.append("line")
+                    .attr("x1", x(d.LoanProductName) - 10)
+                    .attr("x2", x(d.LoanProductName) + 10)
+                    .attr("y1", y(stats.max))
+                    .attr("y2", y(stats.max))
+                    .attr("class", "whisker")
+                    .on("mouseover", function (event) { showTooltip(event, `Max: ${stats.max}`); })
+                    .on("mouseout", hideTooltip);
+            });
+        }
+
+        function generateTable(tableBodyId, data) {
+            const tableBody = document.querySelector(tableBodyId);
+            tableBody.innerHTML = ""; // 清空表格內容
+
+            // 找出最大的變異數
+            const variances = data.map(d => getBoxPlotStats(d.InterestRates || d.LoanAmounts).variance);
+            const maxVariance = Math.max(...variances);
+
+            data.forEach(d => {
+                const stats = getBoxPlotStats(d.InterestRates || d.LoanAmounts);
+                const row = document.createElement("tr");
+                row.innerHTML = `
+            <td>${d.LoanProductName}</td>
+            <td>${stats.q1.toFixed(3)}</td>
+            <td>${stats.median.toFixed(3)}</td>
+            <td>${stats.q3.toFixed(3)}</td>
+            <td>${stats.interQuantileRange.toFixed(3)}</td>
+            <td>${stats.min.toFixed(3)}</td>
+            <td>${stats.max.toFixed(3)}</td>
+            <td>${stats.mean.toFixed(3)}</td>
+            <td class="${stats.variance === maxVariance ? 'max-variance' : ''}">${stats.variance.toFixed(3)}</td>
+        `;
+                tableBody.appendChild(row);
+            });
+        }
+
+       
+
+
+        function toggleView(view) {
+            if (view === 'interest') {
+                document.getElementById('interest-container').classList.remove('hidden');
+                document.getElementById('amount-container').classList.add('hidden');
+            } else if (view === 'amount') {
+                document.getElementById('interest-container').classList.add('hidden');
+                document.getElementById('amount-container').classList.remove('hidden');
+            }
+        }
+
+        function updatePie(data) {
+            var ctx2 = document.getElementById('LoanCategoryChart').getContext('2d');
+            var transactionCategoryChart = new Chart(ctx2, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d.LoanProductName),
+                    datasets: [{
+                        data: data.map(d => d.TotalLoanCount),
+                        backgroundColor: [
+                            "#1d7af3", "#f3545d", "#fdaf4b", "#2ecc71", "#9b59b6",
+                            "#34495e", "#f1c40f", "#e67e22", "#e74c3c", "#95a5a6",
+                            "#d35400", "#2980b9", "#8e44ad", "#27ae60", "#c0392b",
+                            "#7f8c8d", "#bdc3c7", "#2c3e50", "#16a085", "#f39c12"
+                        ],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            fontColor: "rgb(154, 154, 154)",
+                            fontSize: 11,
+                            usePointStyle: true,
+                            padding: 20,
+                        }
+                    },
+                    pieceLabel: {
+                        render: "percentage",
+                        fontColor: "white",
+                        fontSize: 14,
+                    },
+                    tooltips: {
+                        callbacks: {
+                            label: function (tooltipItem, data) {
+                                var dataset = data.datasets[tooltipItem.datasetIndex];
+                                var total = dataset.data.reduce((previousValue, currentValue, currentIndex, array) => {
+                                    return previousValue + currentValue;
+                                });
+                                var currentValue = dataset.data[tooltipItem.index];
+                                var percentage = Math.floor(((currentValue / total) * 100) + 0.5); // 四舍五入百分比
+                                return `${data.labels[tooltipItem.index]}: ${currentValue}件 (${percentage}%)`;
+                            }
+                        },
+                        backgroundColor: "rgba(0, 0, 0, 0.7)",
+                        titleFontSize: 14,
+                        titleFontColor: "#fff",
+                        bodyFontColor: "#fff",
+                        bodyFontSize: 12,
+                        displayColors: false
+                    },
+                    layout: {
+                        padding: {
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 20,
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBarChart(data) {
+            var ctx = document.getElementById('multipleBarChart').getContext('2d');
+
+            var myMultipleBarChart = new Chart(multipleBarChart, {
+                type: "bar",
+                data: {
+                    labels: data.Dates,
+                    datasets: [
+                        {
+                            label: "房屋貸款",
+                            backgroundColor: "#1d7af3",
+                            borderColor: "#1d7af3",
+                            data: data.HomeCounts,
+                        },
+                        {
+                            label: "汽車貸款",
+                            backgroundColor: "#f3545d",
+                            borderColor: "#f3545d",
+                            data: data.CatCounts,
+                        },
+                        {
+                            label: "學生貸款",
+                            backgroundColor: "#fdaf4b",
+                            borderColor: "#fdaf4b",
+                            data: data.StudentCounts,
+                        },
+                        {
+                            label: "小額信貸",
+                            backgroundColor: "#2ecc71",
+                            borderColor: "#2ecc71",
+                            data: data.IntCounts,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                    },
+                    title: {
+                        display: true,
+                        text: "Catrgory Stats",
+                    },
+                    tooltips: {
+                        mode: "index",
+                        intersect: false,
+                    },
+                    responsive: true,
+                    scales: {
+                        xAxes: [
+                            {
+                                stacked: true,
+                            },
+                        ],
+                        yAxes: [
+                            {
+                                stacked: true,
+                            },
+                        ],
+                    },
+                },
+            });
+        }
+
+        //var ctx2 = document.getElementById('LoanCategoryChart').getContext('2d');
+        //var transactionCategoryChart = new Chart(ctx2, {
+        //    type: 'pie',
+        //    data: {
+        //        labels: pieChartData.Labels,
+        //        datasets: [{
+        //            data: pieChartData.Data,
+        //            backgroundColor: [
+        //                "#1d7af3", "#f3545d", "#fdaf4b", "#2ecc71", "#9b59b6",
+        //                "#34495e", "#f1c40f", "#e67e22", "#e74c3c", "#95a5a6",
+        //                "#d35400", "#2980b9", "#8e44ad", "#27ae60", "#c0392b",
+        //                "#7f8c8d", "#bdc3c7", "#2c3e50", "#16a085", "#f39c12"
+        //            ],
+        //            borderWidth: 0,
+        //        }]
+        //    },
+        //    options: {
+        //        responsive: true,
+        //        maintainAspectRatio: false,
+        //        legend: {
+        //            position: "bottom",
+        //            labels: {
+        //                fontColor: "rgb(154, 154, 154)",
+        //                fontSize: 11,
+        //                usePointStyle: true,
+        //                padding: 20,
+        //            }
+        //        },
+        //        pieceLabel: {
+        //            render: "percentage",
+        //            fontColor: "white",
+        //            fontSize: 14,
+        //        },
+        //        tooltips: false,
+        //        layout: {
+        //            padding: {
+        //                left: 20,
+        //                right: 20,
+        //                top: 20,
+        //                bottom: 20,
+        //            }
+        //        }
+        //    }
+        //});
+
+    </script>
+}

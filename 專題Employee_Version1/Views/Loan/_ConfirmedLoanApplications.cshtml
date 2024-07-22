@@ -1,0 +1,44 @@
+﻿@model IEnumerable<專題Employee_Version1.Models.LoanApplication>
+
+<table class="table">
+    <tr>
+        <th>
+            案件編號
+        </th>
+        <th>
+            狀態
+        </th>
+        <th>
+            action
+        </th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            @if (item.LoanStatus == "Confirmed")
+            {
+                <td>
+                    @Html.DisplayFor(modelItem => item.LoanApplicationID)
+                </td>
+                <td style="color:dodgerblue">已審核</td>
+                <td>
+                  
+                    @Html.ActionLink("案件詳細資訊", "LoanApplicationDetail", new { id = item.LoanApplicationID })
+                </td>
+            }
+            else if (item.LoanStatus == "Rejected")
+            {
+
+                <td>
+                    @Html.DisplayFor(modelItem => item.LoanApplicationID)
+                </td>
+                <td style="color:darkorange">審核未通過</td>
+                <td>
+                 
+                    @Html.ActionLink("案件詳細資訊", "LoanApplicationDetail", new { id = item.LoanApplicationID })
+                </td>
+            }
+        </tr>
+    }
+</table>
+

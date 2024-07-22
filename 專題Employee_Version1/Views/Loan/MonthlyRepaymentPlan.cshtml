@@ -1,0 +1,100 @@
+﻿@model IEnumerable<專題Employee_Version1.Models.ViewModels.MonthlyRepaymentPlanViewModel>
+
+@{
+    ViewBag.Title = "本月應還款計畫";
+}
+
+<h2>本月應還款計畫</h2>
+<p></p>
+
+<div>
+    <form id="dateFilterForm">
+        <div class="form-group">
+            @Html.Label("開始日期")
+            @Html.TextBox("startDate", null, new { @class = "datepicker form-control" })
+        </div>
+        <div class="form-group">
+            @Html.Label("結束日期")
+            @Html.TextBox("endDate", null, new { @class = "datepicker form-control" })
+        </div>
+        <button type="submit" class="btn btn-primary">篩選</button>
+    </form>
+</div>
+
+
+<div>
+    <button id="allRepaymentPlansBtn" class="btn btn-primary">
+        所有本月還款計畫 (@ViewBag.AllCount)
+    </button>
+    <button id="paidRepaymentPlansBtn" class="btn btn-success">
+        已還款計畫 (@ViewBag.PaidCount)
+    </button>
+    <button id="unpaidRepaymentPlansBtn" class="btn btn-danger">
+        未還款計畫 (@ViewBag.UnpaidCount)
+    </button>
+</div>
+
+<div id="repaymentPlansContainer">
+    @Html.Partial("_AllRepaymentPlans", Model)
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+    <script>
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true
+            });
+
+            $("#dateFilterForm").submit(function (e) {
+                e.preventDefault();
+                var startDate = $("#startDate").val();
+                var endDate = $("#endDate").val();
+
+                $.ajax({
+                    url: '@Url.Action("MonthlyRepaymentPlan", "Loan")',
+                    type: 'GET',
+                    data: { startDate: startDate, endDate: endDate },
+                    success: function (data) {
+                        $("#repaymentPlansContainer").html(data);
+                    }
+                });
+            });
+
+            $("#allRepaymentPlansBtn").click(function () {
+                $.ajax({
+                    url: '@Url.Action("AllRepaymentPlans", "Loan")',
+                    type: 'GET',
+                    success: function (data) {
+                        $("#repaymentPlansContainer").html(data);
+                    }
+                });
+            });
+
+            $("#paidRepaymentPlansBtn").click(function () {
+                $.ajax({
+                    url: '@Url.Action("PaidRepaymentPlans", "Loan")',
+                    type: 'GET',
+                    success: function (data) {
+                        $("#repaymentPlansContainer").html(data);
+                    }
+                });
+            });
+
+            $("#unpaidRepaymentPlansBtn").click(function () {
+                $.ajax({
+                    url: '@Url.Action("UnpaidRepaymentPlans", "Loan")',
+                    type: 'GET',
+                    success: function (data) {
+                        $("#repaymentPlansContainer").html(data);
+                    }
+                });
+            });
+        });
+    </script>
+}

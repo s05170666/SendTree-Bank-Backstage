@@ -1,0 +1,191 @@
+﻿@{
+    ViewBag.Title = "MonthlyRepaymentPlan2";
+}
+
+<h2>還款計畫-依日期篩選</h2>
+
+<div>
+    <form id="dateFilterForm">
+        <div class="form-group">
+            @Html.Label("開始日期")
+            @Html.TextBox("startDate", null, new { @class = "datepicker form-control", @id = "startDate", autocomplete = "off" })
+        </div>
+        <div class="form-group">
+            @Html.Label("結束日期")
+            @Html.TextBox("endDate", null, new { @class = "datepicker form-control", @id = "endDate", autocomplete = "off" })
+        </div>
+        <button type="submit" class="btn btn-primary">篩選</button>
+        <bttton  id="updateData" class="btn btn-secondary">匯入本月交易紀錄</bttton>
+    </form>
+</div>
+
+<div class="mt-3">
+    <button id="allRepaymentPlansBtn" class="btn btn-primary">
+        所有案件 (<span id="allCount">0</span>)
+    </button>
+    <button id="paidRepaymentPlansBtn" class="btn btn-success">
+        已繳款 (<span id="paidCount">0</span>)
+    </button>
+    <button id="unpaidRepaymentPlansBtn" class="btn btn-danger">
+        未繳款 (<span id="unpaidCount">0</span>)
+    </button>
+</div>
+
+<div id="repaymentSchedulesContainer" class="mt-3">
+    <!-- 篩選結果會顯示在這裡 -->
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" rel="stylesheet">
+
+    <script>
+        $(document).ready(function () {
+
+            var result = {
+                RepaymentSchedules: [],
+                AllCount: 0,
+                PaidCount: 0,
+                UnpaidCount: 0
+            };
+
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true
+            });
+
+            function updateCounts(data) {
+                $("#allCount").text(data.AllCount);
+                $("#paidCount").text(data.PaidCount);
+                $("#unpaidCount").text(data.UnpaidCount);
+            }
+
+            function renderTable(data) {
+                var tableHtml = '<table class="table">' +
+                    '<thead>' +
+                    '<tr>' +
+                    '<th>案件編號</th>' +
+                    '<th>客戶ID</th>' +
+                    '<th>客戶名稱</th>' +
+                    '<th>本期應還款金額</th>' +
+                    '<th>繳款期限</th>' +
+                    '<th>狀態</th>' +
+                    '<th>操作</th>' + // 新增操作列
+                    '</tr>' +
+                    '</thead>' +
+                    '<tbody>';
+
+                data.RepaymentSchedules.forEach(function (item) {
+                    // 格式化金額為整數
+                    var formattedAmount = new Intl.NumberFormat('zh-TW', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(item.RepaymentSchedule.RepaymentAmount);
+
+                    tableHtml += '<tr>' +
+                        '<td>' + item.LoanApplication.LoanApplicationID + '</td>' +
+                        '<td>' + item.Customer.CustomerID + '</td>' +
+                        '<td>' + item.Customer.FirstName + '</td>' +
+                        '<td>' + formattedAmount + '</td>' +
+                        '<td>' + item.RepaymentSchedule.RepaymentDate + '</td>';
+
+                    var repaymentStatus = item.RepaymentSchedule.RepaymentStatus;
+
+                    if (repaymentStatus === "Pending") {
+                        tableHtml += '<td style="color:red">尚未繳款</td>';
+                    } else if (repaymentStatus === "Paid") {
+                        tableHtml += '<td style="color:blue">已繳款</td>';
+                    } else {
+                        
+                        tableHtml += '<td style="color:	#800000">' + repaymentStatus + '</td>';
+                    }
+
+                     
+                    tableHtml += '<td><button class="btn btn-info btn-sm btn-detail" data-id="' + item.LoanApplication.LoanApplicationID + '">詳細資料</button></td>';
+                    tableHtml += '</tr>';
+                });
+
+                tableHtml += '</tbody></table>';
+                $("#repaymentSchedulesContainer").html(tableHtml);
+
+                // 綁定詳細資料按鈕的點擊事件
+                $(".btn-detail").click(function () {
+                    var loanApplicationId = $(this).data("id");
+                    window.location.href = '/Loan/LoanApplicationDetail/' + loanApplicationId;
+                });
+            }
+
+
+            $("#dateFilterForm").submit(function (e) {
+                e.preventDefault();
+                var startDate = $("#startDate").val();
+                var endDate = $("#endDate").val();
+
+                $.ajax({
+                    url: '@Url.Action("GetFilteredRepaymentSchedules", "Loan")',
+                    type: 'GET',
+                    data: { startDate: startDate, endDate: endDate },
+                    success: function (data) {
+                        result = data;
+                        renderTable(result);
+                        updateCounts(result);
+                    }
+                });
+            });
+
+
+            $("#allRepaymentPlansBtn").click(function () {
+                renderTable(result);
+                updateCounts(result);
+            });
+
+            $("#paidRepaymentPlansBtn").click(function () {
+                var paidData = {
+                    RepaymentSchedules: result.RepaymentSchedules.filter(function (item) {
+                        return item.RepaymentSchedule.RepaymentStatus === 'Paid';
+                    }),
+                    AllCount: result.AllCount,
+                    PaidCount: result.PaidCount,
+                    UnpaidCount: result.UnpaidCount
+                };
+                renderTable(paidData);
+                updateCounts(paidData);
+            });
+
+            $("#unpaidRepaymentPlansBtn").click(function () {
+                var unpaidData = {
+                    RepaymentSchedules: result.RepaymentSchedules.filter(function (item) {
+                        return item.RepaymentSchedule.RepaymentStatus !== 'Paid';
+                    }),
+                    AllCount: result.AllCount,
+                    PaidCount: result.PaidCount,
+                    UnpaidCount: result.UnpaidCount
+                };
+                renderTable(unpaidData);
+                updateCounts(unpaidData);
+            });
+
+            $('#updateData').click(function () {
+
+    $.ajax({
+        url: '@Url.Action("UpdateRepaymentStatus", "Loan")',
+        type: 'post',
+        success: function (response) {
+            if (response.success) {
+                // 成功处理逻辑
+                alert(response.message); // 显示成功消息
+                location.reload(); // 重新加载页面
+            } else {
+                // 失败处理逻辑
+                alert(response.message); // 显示错误消息
+            }
+        },
+        error: function (xhr, status, error) {
+            // 错误处理逻辑
+            alert("An error occurred: " + error); // 显示通用错误消息
+        }
+    });
+});
+
+        });
+    </script>
+}

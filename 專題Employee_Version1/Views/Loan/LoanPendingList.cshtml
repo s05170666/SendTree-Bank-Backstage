@@ -1,0 +1,41 @@
+﻿@model IEnumerable<專題Employee_Version1.Models.LoanApplication>
+
+@{
+    ViewBag.Title = "LoanPendingList";
+}
+
+<h2>LoanPendingList</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            案件編號
+        </th>
+
+        <th>
+            狀態
+        </th>
+
+
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.LoanApplicationID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LoanStatus)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.LoanApplicationID }) |
+                @Html.ActionLink("Details", "LoanApplicationDetail", new { id = item.LoanApplicationID }) |
+            </td>
+        </tr>
+    }
+
+</table>

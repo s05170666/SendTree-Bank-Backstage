@@ -1,0 +1,404 @@
+﻿@model 專題Employee_Version1.Models.ViewModels.LoanApplicationViewModel
+
+@{
+    ViewBag.Title = "LoanApplicationDetail";
+}
+@section Styles{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.min.css">
+
+}
+
+<div class="row">
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Modal -->
+                <div class="modal fade"
+                     id="addRowModal"
+                     tabindex="-1"
+                     role="dialog"
+                     aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title">
+                                    <span class="fw-mediumbold"> New</span>
+                                    <span class="fw-light"> Row </span>
+                                </h5>
+                                <button type="button"
+                                        class="close"
+                                        data-dismiss="modal"
+                                        aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="small">
+                                    Create a new row using this form, make sure you
+                                    fill them all
+                                </p>
+                                <form>
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <div class="form-group form-group-default">
+                                                <label>Name</label>
+                                                <input id="addName"
+                                                       type="text"
+                                                       class="form-control"
+                                                       placeholder="fill name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 pe-0">
+                                            <div class="form-group form-group-default">
+                                                <label>Position</label>
+                                                <input id="addPosition"
+                                                       type="text"
+                                                       class="form-control"
+                                                       placeholder="fill position" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group form-group-default">
+                                                <label>Office</label>
+                                                <input id="addOffice"
+                                                       type="text"
+                                                       class="form-control"
+                                                       placeholder="fill office" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="button"
+                                        id="addRowButton"
+                                        class="btn btn-primary">
+                                    Add
+                                </button>
+                                <button type="button"
+                                        class="btn btn-danger"
+                                        data-dismiss="modal">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title">貸款案件詳情</h4>
+                                </div>
+                                <div class="card-body">
+                                    <dl class="row">
+                                        <dt class="col-sm-3">產品名稱</dt>
+                                        <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductName)</dd>
+
+                                        <dt class="col-sm-3">客戶姓名</dt>
+                                        <dd class="col-sm-9">@Html.DisplayFor(model => model.FirstName) @Html.DisplayFor(model => model.LastName)</dd>
+
+                                        <dt class="col-sm-3">電話號碼</dt>
+                                        <dd class="col-sm-9">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+
+                                        <dt class="col-sm-3">電子郵件</dt>
+                                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+
+                                        @*<dt class="col-sm-3">申請日期</dt>
+                                            <dd class="col-sm-9">@Model.ApplicationDate.ToString("yyyy/MM/dd")</dd>*@
+                                        <dt class="col-sm-3">證明文件</dt>
+                                        <dd class="col-sm-9">
+                                            <span style="display: inline-block; margin-right: 10px;">@Model.EconomicProof</span>
+                                            <a href="@Url.Action("DownloadEconomicProof", "Loan", new { fileName = Model.EconomicProof })">
+                                                下載文件
+                                            </a>
+                                        </dd>
+
+
+
+                                        <dt class="col-sm-3">貸款金額</dt>
+                                        <dd class="col-sm-9">@Model.LoanAmount.ToString("N0")</dd>
+
+                                        <dt class="col-sm-3">貸款審核狀態</dt>
+                                        <dd class="col-sm-9">@Html.DisplayFor(model => model.LoanStatus)</dd>
+
+                                        <dt class="col-sm-3">撥款帳戶</dt>
+                                        <dd class="col-sm-9">@Html.DisplayFor(model => model.DisbursementAccount)</dd>
+
+                                        <dt class="col-sm-3">還款期數</dt>
+                                        <dd class="col-sm-9">@Html.DisplayFor(model => model.RepaymentMonths)</dd>
+
+                                        <dt class="col-sm-3">利率</dt>
+                                        <dd class="col-sm-9">@Html.DisplayFor(model => model.InterestRate) %</dd>
+                                        @if (Model.LoanStatus == "Confirmed")
+                                        {
+                                            <dt class="col-sm-3">還款帳號</dt>
+                                            <dd class="col-sm-9">@Html.ActionLink(Model.RepaymentAccount, "TransactionLogByAccountNumber", new { accountNumber = Model.RepaymentAccount }) 點選可查看還款紀錄</dd>
+                                        }
+
+                                        @if (ViewBag.TotalPaidAmount != null)
+                                        {
+                                            <dt class="col-sm-3">已還金額</dt>
+                                            <dd class="col-sm-9">@ViewBag.TotalPaidAmount</dd>
+                                            <dt class="col-sm-3">已還期數</dt>
+                                            <dd class="col-sm-9">@ViewBag.CountPaidAmount　期</dd>
+                                        }
+
+                                    </dl>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                    @if (Model.LoanStatus == "Pending")
+                    {
+                        <a href="@Url.Action("LoanConfirm", "Loan", new { id = Model.LoanApplicationID })" class="btn btn-warning">審核通過</a>
+                        <a href="@Url.Action("LoanReject", "Loan" , new { id = Model.LoanApplicationID})" class="btn btn-danger">審核不通過</a>
+
+                    }
+                </div>
+
+            </div>
+            @{
+                if (Model.RepaymentSchedules != null)
+                {
+
+                    <div class="table-responsive">
+                        <table id="add-row"
+                               class="display table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>還款期限</th>
+                                    <th>應還款金額</th>
+                                    <th>還款狀態</th>
+
+
+                                    <th style="width: 10%">Action</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>還款期限</th>
+                                    <th>應還款金額</th>
+                                    <th>還款狀態</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                @foreach (var item in Model.RepaymentSchedules)
+                                {
+
+                                    <tr>
+                                        <td>@item.RepaymentDate.ToString("yyyy/MM/dd")</td>
+                                        <td>@item.RepaymentAmount.ToString("N0")</td>
+                                        @*<td>@item.RepaymentStatus</td>*@
+                                        @if (item.RepaymentStatus == "Pending")
+                                        {
+                                            <td style="color:red">尚未還款</td>
+                                        }
+                                        else if (item.RepaymentStatus == "Paid")
+                                        {
+
+
+                                            <td style="color:mediumblue">已還款</td>
+                                        }
+                                        else
+                                        {
+                                            <td style="color:#800000">@item.RepaymentStatus</td>
+                                        }
+
+
+
+                                        <td>
+                                            <div class="form-button-action">
+                                                <button type="button"
+                                                        data-bs-toggle="tooltip"
+                                                        title=""
+                                                        class="btn btn-link btn-primary btn-lg"
+                                                        data-original-title="Edit Task"
+                                                        onclick="confirmEdit('@item.RepaymentScheduleID')">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+
+
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                }
+
+
+            }
+
+        </div>
+    </div>
+</div>
+<div class="mt-4">
+    <button class="btn btn-secondary" onclick="window.location.href='@Url.Action("Index")'">返回案件總覽</button>
+    @*<a href="javascript:history.back()" class="btn btn-secondary">返回上一頁</a>*@
+</div>
+
+
+@section scripts{
+    <script src="/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/core/popper.min.js"></script>
+    <script src="/assets/js/core/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <!-- Datatables -->
+    <script src="/assets/js/plugin/datatables/datatables.min.js"></script>
+    <!-- Kaiadmin JS -->
+    <script src="/assets/js/kaiadmin.min.js"></script>
+
+    <script>
+         function confirmEdit(scheduleId) {
+        Swal.fire({
+            title: '確定修改還款狀態?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '確定',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                //執行ajax請求
+                $.ajax({
+                    url: '@Url.Action("RepaymentScheduleStatusEdit", "Loan")',
+                    type: 'POST',
+                    data: { id: scheduleId },
+                    success: function (response) {
+                        // 處理成功
+                        Swal.fire({
+                            title: '成功',
+                            text: '修改成功!',
+                            icon: 'success'
+                        }).then(() => {
+                            //重新整理頁面
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        // 處理錯誤情況
+                        Swal.fire({
+                            title: '錯誤',
+                            text: '修改失败',
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    }
+        $(document).ready(function () {
+
+            $("#basic-datatables").DataTable({});
+
+            $("#multi-filter-select").DataTable({
+                pageLength: 5,
+                initComplete: function () {
+                    this.api()
+                        .columns()
+                        .every(function () {
+                            var column = this;
+                            var select = $(
+                                '<select class="form-select"><option value=""></option></select>'
+                            )
+                                .appendTo($(column.footer()).empty())
+                                .on("change", function () {
+                                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
+
+                                    column
+                                        .search(val ? "^" + val + "$" : "", true, false)
+                                        .draw();
+                                });
+
+                            column
+                                .data()
+                                .unique()
+                                .sort()
+                                .each(function (d, j) {
+                                    select.append(
+                                        '<option value="' + d + '">' + d + "</option>"
+                                    );
+                                });
+                        });
+                },
+            });
+
+            // Add Row
+            $("#add-row").DataTable({
+                pageLength: 5,
+            });
+
+            var action =
+                '<td> <div class="form-button-action"> <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
+
+            $("#addRowButton").click(function () {
+                $("#add-row")
+                    .dataTable()
+                    .fnAddData([
+                        $("#addName").val(),
+                        $("#addPosition").val(),
+                        $("#addOffice").val(),
+                        action,
+                    ]);
+                $("#addRowModal").modal("hide");
+            });
+
+             function confirmEdit(scheduleId) {
+        Swal.fire({
+            title: '确认修改?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '是的，修改',
+            cancelButtonText: '取消'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // 执行 Ajax 请求
+                $.ajax({
+                    url: '@Url.Action("RepaymentScheduleStatusEdit", "Loan")',
+                    type: 'POST', // 根据实际情况选择 GET 或 POST
+                    data: { id: scheduleId },
+                    success: function (response) {
+                        // 处理成功响应
+                        Swal.fire({
+                            title: '成功',
+                            text: '修改成功!',
+                            icon: 'success'
+                        }).then(() => {
+                            // 刷新页面或者执行其他操作
+                            location.reload();
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        // 处理错误情况
+                        Swal.fire({
+                            title: '错误',
+                            text: '修改失败，请重试!',
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    }
+        });
+    </script>
+}

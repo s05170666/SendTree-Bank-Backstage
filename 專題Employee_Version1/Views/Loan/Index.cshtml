@@ -1,0 +1,70 @@
+﻿@model IEnumerable<專題Employee_Version1.Models.LoanApplication>
+
+
+@{
+    ViewBag.Title = "LoanApplication";
+}
+
+<h2>貸款案件總覽</h2>
+
+
+
+<div>
+    <button id="allApplicationsBtn" class="btn btn-primary">
+        <span class="btn-label"><i class="fa fa-bookmark"></i></span>
+        所有案件總覽(@ViewBag.AllCount)
+    </button>
+    <button id="pendingApplicationsBtn" class="btn btn-secondary">
+        <span class="btn-label"><i class="fa fa-plus"></i></span>
+        待辦案件總覽(@ViewBag.PendingCount)
+    </button>
+    <button id="confirmedApplicationsBtn" class="btn btn-success">
+        <span class="btn-label">
+            <i class="fa fa-check"></i>
+        </span>
+        已審核案件總覽(@ViewBag.ConfirmedCount)
+    </button>
+</div>
+
+<div id="loanApplicationsContainer">
+    @Html.Partial("_AllLoanApplications", Model)
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#allApplicationsBtn").click(function () {
+                $.ajax({
+                    url: '@Url.Action("AllLoanApplications", "Loan")',
+
+                    type: 'GET',
+                    success: function (data) {
+                        $("#loanApplicationsContainer").html(data);
+                    }
+                });
+            });
+
+            $("#pendingApplicationsBtn").click(function () {
+                $.ajax({
+                    url: '@Url.Action("PendingLoanApplications", "Loan")',
+                    type: 'GET',
+                    success: function (data) {
+                        $("#loanApplicationsContainer").html(data);
+                    }
+                });
+            });
+
+            $("#confirmedApplicationsBtn").click(function () {
+                $.ajax({
+                    url: '@Url.Action("ConfirmedLoanApplications", "Loan")',
+                    type: 'GET',
+                    success: function (data) {
+                        $("#loanApplicationsContainer").html(data);
+                    }
+                });
+            });
+        });
+    </script>
+}
+

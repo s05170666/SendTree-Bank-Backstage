@@ -1,0 +1,24 @@
+﻿
+@model IEnumerable<專題Employee_Version1.Models.ViewModels.MonthlyRepaymentPlanViewModel>
+
+<table class="table">
+    <tr>
+        <th>案件編號</th>
+        <th>客戶ID</th>
+        <th>客戶名稱</th>
+        <th>還款金額</th>
+        <th>還款日期</th>
+        <th>狀態</th>
+    </tr>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.LoanApplication.LoanApplicationID)</td>
+            <td>@Html.DisplayFor(modelItem => item.Customer.CustomerID)</td>
+            <td>@Html.DisplayFor(modelItem => item.Customer.LastName)</td>
+            <td>@Html.DisplayFor(modelItem => item.RepaymentSchedule.RepaymentAmount)</td>
+            <td>@Html.DisplayFor(modelItem => item.RepaymentSchedule.RepaymentDate)</td>
+            <td>@Html.DisplayFor(modelItem => item.LoanApplication.LoanStatus)</td>
+        </tr>
+    }
+</table>

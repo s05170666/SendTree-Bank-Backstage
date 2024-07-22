@@ -1,0 +1,450 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="Version3_LoanModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="CustomersInLoan">
+          <Key>
+            <PropertyRef Name="CustomerID" />
+          </Key>
+          <Property Name="CustomerID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="FirstName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="LastName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="DateOfBirth" Type="date" Nullable="false" />
+          <Property Name="PhoneNumber" Type="nvarchar" MaxLength="20" />
+          <Property Name="Email" Type="nvarchar" MaxLength="100" />
+          <Property Name="Address" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="IncomeRangeRate">
+          <Key>
+            <PropertyRef Name="IncomeRangeID" />
+          </Key>
+          <Property Name="IncomeRangeID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IncomeRange" Type="nvarchar" MaxLength="50" />
+          <Property Name="AdjustmentRate" Type="decimal" Precision="5" Scale="2" />
+        </EntityType>
+        <EntityType Name="LoanApplications">
+          <Key>
+            <PropertyRef Name="LoanApplicationID" />
+          </Key>
+          <Property Name="LoanApplicationID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CustomerID" Type="int" Nullable="false" />
+          <Property Name="LoanProductID" Type="int" Nullable="false" />
+          <Property Name="ApplicationDate" Type="date" Nullable="false" />
+          <Property Name="LoanAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="LoanStatus" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="EconomicProof" Type="nvarchar" MaxLength="255" />
+          <Property Name="DisbursementAccount" Type="nvarchar" MaxLength="255" />
+          <Property Name="RepaymentMonths" Type="int" />
+          <Property Name="TotalRepaymentAmount" Type="decimal" Precision="18" Scale="2" />
+          <Property Name="RepaymentAccountID" Type="int" />
+          <Property Name="InterestRate" Type="decimal" Precision="5" Scale="2" />
+        </EntityType>
+        <EntityType Name="LoanProducts">
+          <Key>
+            <PropertyRef Name="LoanProductID" />
+          </Key>
+          <Property Name="LoanProductID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProductName" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="InterestRate" Type="decimal" Precision="5" Scale="2" Nullable="false" />
+          <Property Name="LoanTerm" Type="int" Nullable="false" />
+          <Property Name="MaxLoanAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="MinLoanAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="ProductDescription" Type="nvarchar" MaxLength="255" />
+          <Property Name="ImageFileName" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityType Name="OccupationGroupRate">
+          <Key>
+            <PropertyRef Name="OccupationGroupRateID" />
+          </Key>
+          <Property Name="OccupationGroupRateID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="OccupationGroup" Type="nvarchar" MaxLength="100" />
+          <Property Name="SubGroup" Type="nvarchar" MaxLength="100" />
+          <Property Name="AdjustmentRate" Type="decimal" Precision="5" Scale="2" />
+        </EntityType>
+        <EntityType Name="RepaymentAccounts">
+          <Key>
+            <PropertyRef Name="RepaymentAccountID" />
+          </Key>
+          <Property Name="RepaymentAccountID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AccountNumber" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="TotalRepaymentAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="AmountPaid" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="RemainingAmount" Type="decimal" Precision="19" Scale="2" StoreGeneratedPattern="Computed" />
+          <Property Name="CreatedDate" Type="datetime" />
+        </EntityType>
+        <EntityType Name="RepaymentSchedules">
+          <Key>
+            <PropertyRef Name="RepaymentScheduleID" />
+          </Key>
+          <Property Name="RepaymentScheduleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LoanApplicationID" Type="int" Nullable="false" />
+          <Property Name="RepaymentDate" Type="date" Nullable="false" />
+          <Property Name="RepaymentAmount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="RepaymentStatus" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <Association Name="FK__LoanAppli__Custo__3B75D760">
+          <End Role="CustomersInLoan" Type="Self.CustomersInLoan" Multiplicity="1" />
+          <End Role="LoanApplications" Type="Self.LoanApplications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CustomersInLoan">
+              <PropertyRef Name="CustomerID" />
+            </Principal>
+            <Dependent Role="LoanApplications">
+              <PropertyRef Name="CustomerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__LoanAppli__LoanP__3C69FB99">
+          <End Role="LoanProducts" Type="Self.LoanProducts" Multiplicity="1" />
+          <End Role="LoanApplications" Type="Self.LoanApplications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LoanProducts">
+              <PropertyRef Name="LoanProductID" />
+            </Principal>
+            <Dependent Role="LoanApplications">
+              <PropertyRef Name="LoanProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Repayment__LoanA__3F466844">
+          <End Role="LoanApplications" Type="Self.LoanApplications" Multiplicity="1" />
+          <End Role="RepaymentSchedules" Type="Self.RepaymentSchedules" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LoanApplications">
+              <PropertyRef Name="LoanApplicationID" />
+            </Principal>
+            <Dependent Role="RepaymentSchedules">
+              <PropertyRef Name="LoanApplicationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplications_RepaymentAccounts">
+          <End Role="RepaymentAccounts" Type="Self.RepaymentAccounts" Multiplicity="0..1" />
+          <End Role="LoanApplications" Type="Self.LoanApplications" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RepaymentAccounts">
+              <PropertyRef Name="RepaymentAccountID" />
+            </Principal>
+            <Dependent Role="LoanApplications">
+              <PropertyRef Name="RepaymentAccountID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Function Name="GenerateRepaymentSchedules" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
+          <Parameter Name="LoanApplicationID" Type="int" Mode="In" />
+        </Function>
+        <EntityContainer Name="Version3_LoanModelStoreContainer">
+          <EntitySet Name="CustomersInLoan" EntityType="Self.CustomersInLoan" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="IncomeRangeRate" EntityType="Self.IncomeRangeRate" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LoanApplications" EntityType="Self.LoanApplications" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LoanProducts" EntityType="Self.LoanProducts" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="OccupationGroupRate" EntityType="Self.OccupationGroupRate" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RepaymentAccounts" EntityType="Self.RepaymentAccounts" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RepaymentSchedules" EntityType="Self.RepaymentSchedules" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__LoanAppli__Custo__3B75D760" Association="Self.FK__LoanAppli__Custo__3B75D760">
+            <End Role="CustomersInLoan" EntitySet="CustomersInLoan" />
+            <End Role="LoanApplications" EntitySet="LoanApplications" />
+          </AssociationSet>
+          <AssociationSet Name="FK__LoanAppli__LoanP__3C69FB99" Association="Self.FK__LoanAppli__LoanP__3C69FB99">
+            <End Role="LoanProducts" EntitySet="LoanProducts" />
+            <End Role="LoanApplications" EntitySet="LoanApplications" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Repayment__LoanA__3F466844" Association="Self.FK__Repayment__LoanA__3F466844">
+            <End Role="LoanApplications" EntitySet="LoanApplications" />
+            <End Role="RepaymentSchedules" EntitySet="RepaymentSchedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplications_RepaymentAccounts" Association="Self.FK_LoanApplications_RepaymentAccounts">
+            <End Role="RepaymentAccounts" EntitySet="RepaymentAccounts" />
+            <End Role="LoanApplications" EntitySet="LoanApplications" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="Version3_LoanModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="CustomersInLoan">
+          <Key>
+            <PropertyRef Name="CustomerID" />
+          </Key>
+          <Property Name="CustomerID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FirstName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="LastName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="DateOfBirth" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Address" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="LoanApplications" Relationship="Self.FK__LoanAppli__Custo__3B75D760" FromRole="CustomersInLoan" ToRole="LoanApplications" />
+        </EntityType>
+        <EntityType Name="IncomeRangeRate">
+          <Key>
+            <PropertyRef Name="IncomeRangeID" />
+          </Key>
+          <Property Name="IncomeRangeID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IncomeRange" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="AdjustmentRate" Type="Decimal" Precision="5" Scale="2" />
+        </EntityType>
+        <EntityType Name="LoanApplication">
+          <Key>
+            <PropertyRef Name="LoanApplicationID" />
+          </Key>
+          <Property Name="LoanApplicationID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CustomerID" Type="Int32" Nullable="false" />
+          <Property Name="LoanProductID" Type="Int32" Nullable="false" />
+          <Property Name="ApplicationDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="LoanAmount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="LoanStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="EconomicProof" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="DisbursementAccount" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="RepaymentMonths" Type="Int32" />
+          <Property Name="TotalRepaymentAmount" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="RepaymentAccountID" Type="Int32" />
+          <Property Name="InterestRate" Type="Decimal" Precision="5" Scale="2" />
+          <NavigationProperty Name="CustomersInLoan" Relationship="Self.FK__LoanAppli__Custo__3B75D760" FromRole="LoanApplications" ToRole="CustomersInLoan" />
+          <NavigationProperty Name="LoanProduct" Relationship="Self.FK__LoanAppli__LoanP__3C69FB99" FromRole="LoanApplications" ToRole="LoanProducts" />
+          <NavigationProperty Name="RepaymentSchedules" Relationship="Self.FK__Repayment__LoanA__3F466844" FromRole="LoanApplications" ToRole="RepaymentSchedules" />
+          <NavigationProperty Name="RepaymentAccount" Relationship="Self.FK_LoanApplications_RepaymentAccounts" FromRole="LoanApplications" ToRole="RepaymentAccounts" />
+        </EntityType>
+        <EntityType Name="LoanProduct">
+          <Key>
+            <PropertyRef Name="LoanProductID" />
+          </Key>
+          <Property Name="LoanProductID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProductName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="InterestRate" Type="Decimal" Precision="5" Scale="2" Nullable="false" />
+          <Property Name="LoanTerm" Type="Int32" Nullable="false" />
+          <Property Name="MaxLoanAmount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="MinLoanAmount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="ProductDescription" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="ImageFileName" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="LoanApplications" Relationship="Self.FK__LoanAppli__LoanP__3C69FB99" FromRole="LoanProducts" ToRole="LoanApplications" />
+        </EntityType>
+        <EntityType Name="OccupationGroupRate">
+          <Key>
+            <PropertyRef Name="OccupationGroupRateID" />
+          </Key>
+          <Property Name="OccupationGroupRateID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OccupationGroup" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="SubGroup" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="AdjustmentRate" Type="Decimal" Precision="5" Scale="2" />
+        </EntityType>
+        <EntityType Name="RepaymentAccount">
+          <Key>
+            <PropertyRef Name="RepaymentAccountID" />
+          </Key>
+          <Property Name="RepaymentAccountID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AccountNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TotalRepaymentAmount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="AmountPaid" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="RemainingAmount" Type="Decimal" Precision="19" Scale="2" annotation:StoreGeneratedPattern="Computed" />
+          <Property Name="CreatedDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="LoanApplications" Relationship="Self.FK_LoanApplications_RepaymentAccounts" FromRole="RepaymentAccounts" ToRole="LoanApplications" />
+        </EntityType>
+        <EntityType Name="RepaymentSchedule">
+          <Key>
+            <PropertyRef Name="RepaymentScheduleID" />
+          </Key>
+          <Property Name="RepaymentScheduleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LoanApplicationID" Type="Int32" Nullable="false" />
+          <Property Name="RepaymentDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="RepaymentAmount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="RepaymentStatus" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <NavigationProperty Name="LoanApplication" Relationship="Self.FK__Repayment__LoanA__3F466844" FromRole="RepaymentSchedules" ToRole="LoanApplications" />
+        </EntityType>
+        <Association Name="FK__LoanAppli__Custo__3B75D760">
+          <End Role="CustomersInLoan" Type="Self.CustomersInLoan" Multiplicity="1" />
+          <End Role="LoanApplications" Type="Self.LoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CustomersInLoan">
+              <PropertyRef Name="CustomerID" />
+            </Principal>
+            <Dependent Role="LoanApplications">
+              <PropertyRef Name="CustomerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__LoanAppli__LoanP__3C69FB99">
+          <End Role="LoanProducts" Type="Self.LoanProduct" Multiplicity="1" />
+          <End Role="LoanApplications" Type="Self.LoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LoanProducts">
+              <PropertyRef Name="LoanProductID" />
+            </Principal>
+            <Dependent Role="LoanApplications">
+              <PropertyRef Name="LoanProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Repayment__LoanA__3F466844">
+          <End Role="LoanApplications" Type="Self.LoanApplication" Multiplicity="1" />
+          <End Role="RepaymentSchedules" Type="Self.RepaymentSchedule" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LoanApplications">
+              <PropertyRef Name="LoanApplicationID" />
+            </Principal>
+            <Dependent Role="RepaymentSchedules">
+              <PropertyRef Name="LoanApplicationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_LoanApplications_RepaymentAccounts">
+          <End Role="RepaymentAccounts" Type="Self.RepaymentAccount" Multiplicity="0..1" />
+          <End Role="LoanApplications" Type="Self.LoanApplication" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="RepaymentAccounts">
+              <PropertyRef Name="RepaymentAccountID" />
+            </Principal>
+            <Dependent Role="LoanApplications">
+              <PropertyRef Name="RepaymentAccountID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Version3_LoanEntities2" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="CustomersInLoans" EntityType="Self.CustomersInLoan" />
+          <EntitySet Name="IncomeRangeRates" EntityType="Self.IncomeRangeRate" />
+          <EntitySet Name="LoanApplications" EntityType="Self.LoanApplication" />
+          <EntitySet Name="LoanProducts" EntityType="Self.LoanProduct" />
+          <EntitySet Name="OccupationGroupRates" EntityType="Self.OccupationGroupRate" />
+          <EntitySet Name="RepaymentAccounts" EntityType="Self.RepaymentAccount" />
+          <EntitySet Name="RepaymentSchedules" EntityType="Self.RepaymentSchedule" />
+          <AssociationSet Name="FK__LoanAppli__Custo__3B75D760" Association="Self.FK__LoanAppli__Custo__3B75D760">
+            <End Role="CustomersInLoan" EntitySet="CustomersInLoans" />
+            <End Role="LoanApplications" EntitySet="LoanApplications" />
+          </AssociationSet>
+          <AssociationSet Name="FK__LoanAppli__LoanP__3C69FB99" Association="Self.FK__LoanAppli__LoanP__3C69FB99">
+            <End Role="LoanProducts" EntitySet="LoanProducts" />
+            <End Role="LoanApplications" EntitySet="LoanApplications" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Repayment__LoanA__3F466844" Association="Self.FK__Repayment__LoanA__3F466844">
+            <End Role="LoanApplications" EntitySet="LoanApplications" />
+            <End Role="RepaymentSchedules" EntitySet="RepaymentSchedules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_LoanApplications_RepaymentAccounts" Association="Self.FK_LoanApplications_RepaymentAccounts">
+            <End Role="RepaymentAccounts" EntitySet="RepaymentAccounts" />
+            <End Role="LoanApplications" EntitySet="LoanApplications" />
+          </AssociationSet>
+          <FunctionImport Name="GenerateRepaymentSchedules">
+            <Parameter Name="LoanApplicationID" Mode="In" Type="Int32" />
+          </FunctionImport>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="Version3_LoanModelStoreContainer" CdmEntityContainer="Version3_LoanEntities2">
+          <EntitySetMapping Name="CustomersInLoans">
+            <EntityTypeMapping TypeName="Version3_LoanModel.CustomersInLoan">
+              <MappingFragment StoreEntitySet="CustomersInLoan">
+                <ScalarProperty Name="CustomerID" ColumnName="CustomerID" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IncomeRangeRates">
+            <EntityTypeMapping TypeName="Version3_LoanModel.IncomeRangeRate">
+              <MappingFragment StoreEntitySet="IncomeRangeRate">
+                <ScalarProperty Name="IncomeRangeID" ColumnName="IncomeRangeID" />
+                <ScalarProperty Name="IncomeRange" ColumnName="IncomeRange" />
+                <ScalarProperty Name="AdjustmentRate" ColumnName="AdjustmentRate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LoanApplications">
+            <EntityTypeMapping TypeName="Version3_LoanModel.LoanApplication">
+              <MappingFragment StoreEntitySet="LoanApplications">
+                <ScalarProperty Name="LoanApplicationID" ColumnName="LoanApplicationID" />
+                <ScalarProperty Name="CustomerID" ColumnName="CustomerID" />
+                <ScalarProperty Name="LoanProductID" ColumnName="LoanProductID" />
+                <ScalarProperty Name="ApplicationDate" ColumnName="ApplicationDate" />
+                <ScalarProperty Name="LoanAmount" ColumnName="LoanAmount" />
+                <ScalarProperty Name="LoanStatus" ColumnName="LoanStatus" />
+                <ScalarProperty Name="EconomicProof" ColumnName="EconomicProof" />
+                <ScalarProperty Name="DisbursementAccount" ColumnName="DisbursementAccount" />
+                <ScalarProperty Name="RepaymentMonths" ColumnName="RepaymentMonths" />
+                <ScalarProperty Name="TotalRepaymentAmount" ColumnName="TotalRepaymentAmount" />
+                <ScalarProperty Name="RepaymentAccountID" ColumnName="RepaymentAccountID" />
+                <ScalarProperty Name="InterestRate" ColumnName="InterestRate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LoanProducts">
+            <EntityTypeMapping TypeName="Version3_LoanModel.LoanProduct">
+              <MappingFragment StoreEntitySet="LoanProducts">
+                <ScalarProperty Name="LoanProductID" ColumnName="LoanProductID" />
+                <ScalarProperty Name="ProductName" ColumnName="ProductName" />
+                <ScalarProperty Name="InterestRate" ColumnName="InterestRate" />
+                <ScalarProperty Name="LoanTerm" ColumnName="LoanTerm" />
+                <ScalarProperty Name="MaxLoanAmount" ColumnName="MaxLoanAmount" />
+                <ScalarProperty Name="MinLoanAmount" ColumnName="MinLoanAmount" />
+                <ScalarProperty Name="ProductDescription" ColumnName="ProductDescription" />
+                <ScalarProperty Name="ImageFileName" ColumnName="ImageFileName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="OccupationGroupRates">
+            <EntityTypeMapping TypeName="Version3_LoanModel.OccupationGroupRate">
+              <MappingFragment StoreEntitySet="OccupationGroupRate">
+                <ScalarProperty Name="OccupationGroupRateID" ColumnName="OccupationGroupRateID" />
+                <ScalarProperty Name="OccupationGroup" ColumnName="OccupationGroup" />
+                <ScalarProperty Name="SubGroup" ColumnName="SubGroup" />
+                <ScalarProperty Name="AdjustmentRate" ColumnName="AdjustmentRate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RepaymentAccounts">
+            <EntityTypeMapping TypeName="Version3_LoanModel.RepaymentAccount">
+              <MappingFragment StoreEntitySet="RepaymentAccounts">
+                <ScalarProperty Name="RepaymentAccountID" ColumnName="RepaymentAccountID" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="TotalRepaymentAmount" ColumnName="TotalRepaymentAmount" />
+                <ScalarProperty Name="AmountPaid" ColumnName="AmountPaid" />
+                <ScalarProperty Name="RemainingAmount" ColumnName="RemainingAmount" />
+                <ScalarProperty Name="CreatedDate" ColumnName="CreatedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="RepaymentSchedules">
+            <EntityTypeMapping TypeName="Version3_LoanModel.RepaymentSchedule">
+              <MappingFragment StoreEntitySet="RepaymentSchedules">
+                <ScalarProperty Name="RepaymentScheduleID" ColumnName="RepaymentScheduleID" />
+                <ScalarProperty Name="LoanApplicationID" ColumnName="LoanApplicationID" />
+                <ScalarProperty Name="RepaymentDate" ColumnName="RepaymentDate" />
+                <ScalarProperty Name="RepaymentAmount" ColumnName="RepaymentAmount" />
+                <ScalarProperty Name="RepaymentStatus" ColumnName="RepaymentStatus" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <FunctionImportMapping FunctionImportName="GenerateRepaymentSchedules" FunctionName="Version3_LoanModel.Store.GenerateRepaymentSchedules" />
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

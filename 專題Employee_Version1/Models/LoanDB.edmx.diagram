@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="fcbf573e98854f4f831088a51e5ea372" Name="Diagram1">
+        <EntityTypeShape EntityType="Version3_LoanModel.CustomersInLoan" Width="1.5" PointX="0.75" PointY="1.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_LoanModel.IncomeRangeRate" Width="1.5" PointX="2.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_LoanModel.LoanApplication" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_LoanModel.LoanProduct" Width="1.5" PointX="0.75" PointY="6.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_LoanModel.OccupationGroupRate" Width="1.5" PointX="4.75" PointY="5.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_LoanModel.RepaymentAccount" Width="1.5" PointX="0.75" PointY="9.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="Version3_LoanModel.RepaymentSchedule" Width="1.5" PointX="5.25" PointY="2" IsExpanded="true" />
+        <AssociationConnector Association="Version3_LoanModel.FK__LoanAppli__Custo__3B75D760" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_LoanModel.FK__LoanAppli__LoanP__3C69FB99" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_LoanModel.FK__Repayment__LoanA__3F466844" ManuallyRouted="false" />
+        <AssociationConnector Association="Version3_LoanModel.FK_LoanApplications_RepaymentAccounts" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,152 @@
+﻿@model IEnumerable<專題Employee_Version1.Models.ViewModels.TransactionViewModel>
+
+@{
+    ViewBag.Title = "Transaction Time Distribution Report";
+    var today = DateTime.Now.ToString("yyyy-MM-dd");
+}
+
+<h2>交易分析圖表</h2>
+
+<form method="get" action="@Url.Action("TransactionTimeDistribution", "Transaction")" class="form-inline">
+    <div class="form-group mb-2">
+        <label for="startDate" class="mr-2">起始日期:</label>
+        <input type="date" id="startDate" name="startDate" value="@ViewBag.StartDate" max="@today" class="form-control mr-3" />
+    </div>
+    <div class="form-group mb-2">
+        <label for="endDate" class="mr-2">結束日期:</label>
+        <input type="date" id="endDate" name="endDate" value="@ViewBag.EndDate" max="@today" class="form-control mr-3" />
+    </div>
+    <button type="submit" class="btn btn-primary mb-2">篩選</button>
+</form>
+
+<div class="col-md-12 mb-4">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">每日交易數</div>
+        </div>
+        <div class="card-body">
+            <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+                <canvas id="transactionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">交易類別</div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container" >
+                    <canvas id="transactionCategoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">交易總計</div>
+            </div>
+            <div class="card-body">
+                <p>交易數: <strong>@ViewBag.TransactionTotalCounts</strong></p>
+                <p>交易金額: <strong>@ViewBag.TotalAmount.ToString("N0")</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/core/popper.min.js"></script>
+    <script src="/assets/js/core/bootstrap.min.js"></script>
+    <!-- Chart JS -->
+    <script src="/assets/js/plugin/chart.js/chart.min.js"></script>
+    <!-- jQuery Scrollbar -->
+    <script src="/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <!-- Kaiadmin JS -->
+    <script src="/assets/js/kaiadmin.min.js"></script>
+    <!-- Kaiadmin DEMO methods, don't include it in your project! -->
+    <script src="/assets/js/setting-demo2.js"></script>
+
+    <script>
+        $(function () {
+            var chartData = @Html.Raw(ViewBag.ChartData);
+            var pieChartData = @Html.Raw(ViewBag.PieChartData);
+
+            // Draw chart
+            var barChart = document.getElementById('transactionChart').getContext('2d');
+            var myBarChart = new Chart(barChart, {
+                type: "line",
+                data: {
+                    labels: chartData.Labels,
+                    datasets: [{
+                        label: "Transactions per Day",
+                        backgroundColor: "rgb(23, 125, 255)",
+                        borderColor: "rgb(23, 125, 255)",
+                        data: chartData.Data
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+
+            // Draw pie chart for transaction categories
+            var ctx2 = document.getElementById('transactionCategoryChart').getContext('2d');
+            var transactionCategoryChart = new Chart(ctx2, {
+                type: 'pie',
+                data: {
+                    labels: pieChartData.Labels,
+                    datasets: [{
+                        data: pieChartData.Data,
+                        backgroundColor: [
+                            "#1d7af3", "#f3545d", "#fdaf4b", "#2ecc71", "#9b59b6",
+                            "#34495e", "#f1c40f", "#e67e22", "#e74c3c", "#95a5a6",
+                            "#d35400", "#2980b9", "#8e44ad", "#27ae60", "#c0392b",
+                            "#7f8c8d", "#bdc3c7", "#2c3e50", "#16a085", "#f39c12"
+                        ],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            fontColor: "rgb(154, 154, 154)",
+                            fontSize: 11,
+                            usePointStyle: true,
+                            padding: 20,
+                        }
+                    },
+                    pieceLabel: {
+                        render: "percentage",
+                        fontColor: "white",
+                        fontSize: 14,
+                    },
+                    tooltips: false,
+                    layout: {
+                        padding: {
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 20,
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
