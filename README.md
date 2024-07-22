@@ -16,6 +16,7 @@ SendTree Bank 是一個基於 ASP.NET MVC 的網上銀行平台，提供貸款�
   - CSS3
   - JavaScript
   - jQuery
+  - AJAX
   - Bootstrap
 
 - **後端**：
