@@ -15,7 +15,6 @@
             @Html.TextBox("endDate", null, new { @class = "datepicker form-control", @id = "endDate", autocomplete = "off" })
         </div>
         <button type="submit" class="btn btn-primary">篩選</button>
-        <bttton  id="updateData" class="btn btn-secondary">匯入本月交易紀錄</bttton>
     </form>
 </div>
 
@@ -166,24 +165,6 @@
 
             $('#updateData').click(function () {
 
-    $.ajax({
-        url: '@Url.Action("UpdateRepaymentStatus", "Loan")',
-        type: 'post',
-        success: function (response) {
-            if (response.success) {
-                // 成功处理逻辑
-                alert(response.message); // 显示成功消息
-                location.reload(); // 重新加载页面
-            } else {
-                // 失败处理逻辑
-                alert(response.message); // 显示错误消息
-            }
-        },
-        error: function (xhr, status, error) {
-            // 错误处理逻辑
-            alert("An error occurred: " + error); // 显示通用错误消息
-        }
-    });
 });
 
         });

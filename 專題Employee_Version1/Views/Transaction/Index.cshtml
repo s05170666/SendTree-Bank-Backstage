@@ -13,8 +13,8 @@
         <div class="col-md-6 text-end">
             <div class="alert alert-primary">
                 <p class="mb-0">
-                    <strong>本週交易次數:</strong> @ViewBag.totalTransaction<br />
-                    <strong>本週交易總金額:</strong> @ViewBag.totalAmount.ToString("N0") 元
+                    <strong>本週交易次數:</strong> @(ViewBag.totalTransaction/2)<br />
+                    <strong>本週交易總金額:</strong> @((ViewBag.totalAmount/2).ToString("N0")) 元
                 </p>
             </div>
         </div>
@@ -30,7 +30,7 @@
                 <th scope="col">交易後餘額</th>
                 <th scope="col">描述</th>
                 <th scope="col">互動帳號</th>
-                <th scope="col">操作</th>
+                @*<th scope="col">操作</th>*@
             </tr>
         </thead>
         <tbody>
@@ -44,17 +44,17 @@
                     <td>@item.BalanceAfterTransaction.ToString("N0")</td>
                     <td>@Html.DisplayFor(modelItem => item.Description)</td>
                     <td>@Html.DisplayFor(modelItem => item.InteractiveAccountNumber)</td>
-                    <td>
+                    @*<td>
                         @Html.ActionLink("詳細資料", "Details", new { id = item.TransactionID }, new { @class = "btn btn-info btn-sm" })
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </td>*@
+                    </tr>
+                    }
+                    </tbody>
+                    </table>
 
-    <div class="row mt-4">
-        <div class="col text-end">
-            <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "User")'">回到首頁</button>
-        </div>
-    </div>
+                    <div class="row mt-4">
+                        <div class="col text-end">
+                            <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Index", "User")'">回到首頁</button>
+                        </div>
+                    </div>
 </div>
