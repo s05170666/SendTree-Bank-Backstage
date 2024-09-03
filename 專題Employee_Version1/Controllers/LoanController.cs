@@ -514,7 +514,21 @@ namespace 專題Employee_Version1.Controllers
             return Json(result, JsonRequestBehavior.AllowGet);
         }
 
-        
+        [HttpPost]
+        public ActionResult UpdateRepaymentStatus()
+        {
+            try
+            {
+                // 執行預存程序
+                _dbLoan3.Database.ExecuteSqlCommand("UpdateRepaymentStatusForCurrentMonth");
+
+                return Json(new { success = true, message = "交易紀錄已匯入 !" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error updating repayment status: " + ex.Message });
+            }
+        }
 
         public ActionResult GetLoanAmount()
         {
