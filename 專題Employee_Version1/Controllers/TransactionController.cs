@@ -1,25 +1,18 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.Mvc;
-using System.Data.Entity;
-
 using 專題Employee_Version1.Models;
-using 專題Employee_Version1.Models.ViewModels;
 using 專題Employee_Version1.services;
 
 namespace 專題Employee_Version1.Controllers
 {
     public class TransactionController : Controller
     {
-        private Version3_CustomerEntities1 _dbCustomer = new Version3_CustomerEntities1();
         private readonly TransactionService _transactionService;
 
         public TransactionController()
         {
-            _transactionService = new TransactionService(_dbCustomer);
+            _transactionService = new TransactionService(new Version3_CustomerEntities1());
         }
 
         // GET: Transaction
@@ -32,8 +25,6 @@ namespace 專題Employee_Version1.Controllers
             ViewBag.currentDate = overview.EndDateLabel;
             return View(overview.Transactions);
         }
-
-
 
         public ActionResult History(DateTime? startDate, DateTime? endDate)
         {
@@ -62,7 +53,6 @@ namespace 專題Employee_Version1.Controllers
             ViewBag.TotalAmount = result.TotalAmount;
 
             return View(result.Transactions);
-
         }
     }
 }

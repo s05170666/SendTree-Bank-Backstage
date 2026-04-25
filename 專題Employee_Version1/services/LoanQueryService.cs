@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using 專題Employee_Version1.Models;
+using 專題Employee_Version1.Models.ServiceModels;
 using 專題Employee_Version1.Models.ViewModels;
 
 namespace 專題Employee_Version1.services
@@ -85,45 +86,83 @@ namespace 專題Employee_Version1.services
                 RepaymentAccountNumber = accountNumber
             };
         }
-    }
 
-    public class RepaymentScheduleFilterResult
-    {
-        public List<RepaymentScheduleItem> RepaymentSchedules { get; set; }
-        public int AllCount { get; set; }
-        public int PaidCount { get; set; }
-        public int UnpaidCount { get; set; }
-    }
+        public List<LoanInterestRateItem> GetLoanInterestRates()
+        {
+            return _dbLoan.LoanApplications.AsNoTracking()
+                .GroupBy(lp => new { lp.LoanProductID, lp.LoanProduct.ProductName })
+                .Select(g => new LoanInterestRateItem
+                {
+                    LoanProductID = g.Key.LoanProductID,
+                    LoanProductName = g.Key.ProductName,
+                    InterestRates = g.Select(lp => lp.InterestRate).ToList(),
+                    TotalLoanCount = g.Count()
+                })
+                .ToList();
+        }
 
-    public class RepaymentScheduleItem
-    {
-        public RepaymentScheduleDto RepaymentSchedule { get; set; }
-        public LoanApplicationDto LoanApplication { get; set; }
-        public CustomerDto Customer { get; set; }
-    }
+        public LoanMonthlyStatsResult GetLoanCountByMonth()
+        {
+            var data = _dbLoan.LoanApplications.AsNoTracking()
+                .GroupBy(lp => new { lp.LoanProductID, lp.ApplicationDate.Year, lp.ApplicationDate.Month })
+                .Select(g => new
+                {
+                    g.Key.LoanProductID,
+                    g.Key.Year,
+                    g.Key.Month,
+                    TotalLoanCount = g.Count()
+                })
+                .ToList();
 
-    public class RepaymentScheduleDto
-    {
-        public DateTime RepaymentDate { get; set; }
-        public decimal RepaymentAmount { get; set; }
-        public string RepaymentStatus { get; set; }
-    }
+            var years = new[] { 2023, 2024 };
+            var months = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            var homeLoanCounts = new List<int>();
+            var carLoanCounts = new List<int>();
+            var studentCounts = new List<int>();
+            var intCounts = new List<int>();
+            var dates = new List<string>();
 
-    public class LoanApplicationDto
-    {
-        public int LoanApplicationID { get; set; }
-    }
+            foreach (var year in years)
+            {
+                foreach (var month in months)
+                {
+                    var homeLoanCount = data.FirstOrDefault(d => d.LoanProductID == 1 && d.Year == year && d.Month == month)?.TotalLoanCount ?? 0;
+                    var carLoanCount = data.FirstOrDefault(d => d.LoanProductID == 2 && d.Year == year && d.Month == month)?.TotalLoanCount ?? 0;
+                    var studentCount = data.FirstOrDefault(d => d.LoanProductID == 3 && d.Year == year && d.Month == month)?.TotalLoanCount ?? 0;
+                    var intCount = data.FirstOrDefault(d => d.LoanProductID == 5 && d.Year == year && d.Month == month)?.TotalLoanCount ?? 0;
 
-    public class CustomerDto
-    {
-        public int? CustomerID { get; set; }
-        public string FirstName { get; set; }
-    }
+                    homeLoanCounts.Add(homeLoanCount);
+                    carLoanCounts.Add(carLoanCount);
+                    studentCounts.Add(studentCount);
+                    intCounts.Add(intCount);
+                    dates.Add(year + "/" + month);
+                }
+            }
 
-    public class TransactionLogQueryResult
-    {
-        public List<TransactionLogViewModel> Logs { get; set; }
-        public decimal AmountPaid { get; set; }
-        public string RepaymentAccountNumber { get; set; }
+            return new LoanMonthlyStatsResult
+            {
+                Years = years,
+                Months = months,
+                HomeCounts = homeLoanCounts,
+                CarCounts = carLoanCounts,
+                StudentCounts = studentCounts,
+                IntCounts = intCounts,
+                Dates = dates
+            };
+        }
+
+        public List<LoanAmountItem> GetLoanAmounts()
+        {
+            return _dbLoan.LoanApplications.AsNoTracking()
+                .GroupBy(lp => new { lp.LoanProductID, lp.LoanProduct.ProductName })
+                .Select(g => new LoanAmountItem
+                {
+                    LoanProductID = g.Key.LoanProductID,
+                    LoanProductName = g.Key.ProductName,
+                    LoanAmounts = g.Select(lp => lp.LoanAmount).ToList(),
+                    TotalLoanCount = g.Count()
+                })
+                .ToList();
+        }
     }
 }

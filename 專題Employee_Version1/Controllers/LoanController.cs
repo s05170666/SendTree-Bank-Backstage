@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using 專題Employee_Version1.Models;
 using 專題Employee_Version1.Models.ViewModels;
 using System.Data.Entity;
-using System.Security.Cryptography.Xml;
-using System.Web.UI.WebControls;
 using System.Text;
 using 專題Employee_Version1.services;
 using System.Threading.Tasks;
@@ -22,7 +18,6 @@ namespace 專題Employee_Version1.Controllers
     public class LoanController : Controller
     {
         private string connectionString = ConfigurationManager.ConnectionStrings["MyConnectionString"].ConnectionString;
-        private readonly AzureBlobService _azureBlobService;
         private Version3_CustomerEntities1 _dbCustomer = new Version3_CustomerEntities1();
         private Version3_LoanEntities5 _dbLoan3 = new Version3_LoanEntities5();
         private readonly LoanQueryService _loanQueryService;
@@ -304,11 +299,6 @@ namespace 專題Employee_Version1.Controllers
                 // 匯入帳號
                 ImportAccountTransaction(loanApplication.DisbursementAccount, loanApplication.LoanAmount);
 
-                var repaymentaccountid = _dbLoan3.RepaymentAccounts
-                    .Where(ra => ra.AccountNumber == loanApplication.DisbursementAccount)
-                    .Select(ra => ra.RepaymentAccountID)
-                    .FirstOrDefault();
-
                 return RedirectToAction("LoanApplicationDetail", new { id = id });
             }
 
@@ -428,90 +418,30 @@ namespace 專題Employee_Version1.Controllers
         //貸款申請統計
         public ActionResult GetLoanInterestRates()
         {
-            var data = _dbLoan3.LoanApplications
-                .GroupBy(lp => new { lp.LoanProductID, lp.LoanProduct.ProductName })
-                .Select(g => new
-                {
-                    LoanProductID = g.Key.LoanProductID,
-                    LoanProductName = g.Key.ProductName,
-                    InterestRates = g.Select(lp => lp.InterestRate).ToList(),
-                    TotalLoanCount = g.Count()
-                })
-                .ToList();
-
+            var data = _loanQueryService.GetLoanInterestRates();
             return Json(data, JsonRequestBehavior.AllowGet);
         }
 
         public ActionResult GetLoanCountByMonth()
         {
-            var data = _dbLoan3.LoanApplications
-                .GroupBy(lp => new { lp.LoanProductID, lp.LoanProduct.ProductName, lp.ApplicationDate.Year, lp.ApplicationDate.Month })
-                .Select(g => new
-                {
-                    LoanProductID = g.Key.LoanProductID,
-                    LoanProductName = g.Key.ProductName,
-                    Year = g.Key.Year,
-                    Month = g.Key.Month,
-                    TotalLoanCount = g.Count()
-                })
-                .OrderBy(g => g.LoanProductID)
-                .ThenBy(g => g.Year)
-                .ThenBy(g => g.Month)
-                .ToList();
-            int[] years = new int[] { 2023, 2024 };
-            int[] months = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
-            List<int> homeLoanCounts = new List<int>();
-            List<int> carLoanCounts = new List<int>();
-            List<int> studentCounts = new List<int>();
-            List<int> ints = new List<int>();
-            List<string> dates = new List<string>();
-            foreach (var year in years)
+            var result = _loanQueryService.GetLoanCountByMonth();
+            return Json(new
             {
-                foreach (var month in months)
-                {
-                    var homeLoanCount = data.FirstOrDefault(d => d.LoanProductID == 1 && d.Year == year && d.Month == month)?.TotalLoanCount ?? 0;
-                    var carLoanCount = data.FirstOrDefault(d => d.LoanProductID == 2 && d.Year == year && d.Month == month)?.TotalLoanCount ?? 0;
-                    var studentCount = data.FirstOrDefault(d => d.LoanProductID == 3 && d.Year == year && d.Month == month)?.TotalLoanCount ?? 0;
-                    var intCount = data.FirstOrDefault(d => d.LoanProductID == 5 && d.Year == year && d.Month == month)?.TotalLoanCount ?? 0;
-
-
-                    homeLoanCounts.Add(homeLoanCount);
-                    carLoanCounts.Add(carLoanCount);
-                    studentCounts.Add(studentCount);
-                    ints.Add(intCount);
-                    dates.Add($"{year}/{month}");
-                }
-            }
-
-            var result = new
-            {
-                年份 = years,
-                months = months,
-                HomeCounts = homeLoanCounts,
-                CatCounts = carLoanCounts,
-                StudentCounts = studentCounts,
-                IntCounts = ints,
-                Dates = dates
-            };
-
-            return Json(result, JsonRequestBehavior.AllowGet);
+                年份 = result.Years,
+                months = result.Months,
+                result.HomeCounts,
+                CatCounts = result.CarCounts,
+                result.StudentCounts,
+                result.IntCounts,
+                result.Dates
+            }, JsonRequestBehavior.AllowGet);
         }
 
         
 
         public ActionResult GetLoanAmount()
         {
-            var data = _dbLoan3.LoanApplications
-                .GroupBy(lp => new { lp.LoanProductID, lp.LoanProduct.ProductName })
-                .Select(g => new
-                {
-                    LoanProductID = g.Key.LoanProductID,
-                    LoanProductName = g.Key.ProductName,
-                    LoanAmounts = g.Select(lp => lp.LoanAmount).ToList(),
-                    TotalLoanCount = g.Count()
-                })
-                .ToList();
-
+            var data = _loanQueryService.GetLoanAmounts();
             return Json(data, JsonRequestBehavior.AllowGet);
         }
 

@@ -848,6 +848,8 @@
     <Compile Include="Models\ViewModels\LoanProductViewModels.cs" />
     <Compile Include="Models\ViewModels\LoanViewModel.cs" />
     <Compile Include="Models\ViewModels\MonthlyRepaymentPlanViewModel.cs" />
+    <Compile Include="Models\ServiceModels\LoanServiceModels.cs" />
+    <Compile Include="Models\ServiceModels\TransactionServiceModels.cs" />
     <Compile Include="Models\ViewModels\TransactionLogViewModel.cs" />
     <Compile Include="Models\ViewModels\TransactionViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using 專題Employee_Version1.Models;
+using 專題Employee_Version1.Models.ServiceModels;
 using 專題Employee_Version1.Models.ViewModels;
 
 namespace 專題Employee_Version1.services
@@ -113,27 +113,5 @@ namespace 專題Employee_Version1.services
                 EndDate = effectiveEnd
             };
         }
-    }
-
-    public class TransactionOverviewResult
-    {
-        public List<Transaction> Transactions { get; set; }
-        public decimal TotalAmount { get; set; }
-        public int TotalTransaction { get; set; }
-        public string StartDateLabel { get; set; }
-        public string EndDateLabel { get; set; }
-    }
-
-    public class TransactionTimeDistributionResult
-    {
-        public List<TransactionViewModel> Transactions { get; set; }
-        public int TransactionTotalCounts { get; set; }
-        public decimal TotalAmount { get; set; }
-        public List<string> ChartLabels { get; set; }
-        public List<int> ChartData { get; set; }
-        public List<string> PieLabels { get; set; }
-        public List<int> PieData { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
     }
 }
