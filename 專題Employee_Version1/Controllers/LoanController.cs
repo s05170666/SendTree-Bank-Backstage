@@ -25,6 +25,12 @@ namespace 專題Employee_Version1.Controllers
         private readonly AzureBlobService _azureBlobService;
         private Version3_CustomerEntities1 _dbCustomer = new Version3_CustomerEntities1();
         private Version3_LoanEntities5 _dbLoan3 = new Version3_LoanEntities5();
+        private readonly LoanQueryService _loanQueryService;
+
+        public LoanController()
+        {
+            _loanQueryService = new LoanQueryService(_dbLoan3);
+        }
 
         public ActionResult Index()
         {
@@ -341,52 +347,33 @@ namespace 專題Employee_Version1.Controllers
         [HttpGet]
         public ActionResult GetFilteredRepaymentSchedules(DateTime? startDate, DateTime? endDate)
         {
-            startDate = startDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-            endDate = endDate ?? startDate.Value.AddMonths(1).AddDays(-1);
-
-            var repaymentSchedules = _dbLoan3.RepaymentSchedules.AsNoTracking()
-                .Where(rs => (!startDate.HasValue || rs.RepaymentDate >= startDate.Value) &&
-                             (!endDate.HasValue || rs.RepaymentDate <= endDate.Value))
-                .OrderBy(rs => rs.RepaymentDate)
-                .Select(rs => new
-                {
-                    rs.LoanApplicationID,
-                    rs.RepaymentDate,
-                    rs.RepaymentAmount,
-                    rs.RepaymentStatus,
-                    CustomerID = rs.LoanApplication.CustomerID,
-                    FirstName = rs.LoanApplication.CustomersInLoan.FirstName
-                })
-                .ToList();
-
-            var viewModelWithOutStatus = repaymentSchedules.Select(rs => new
+            var result = _loanQueryService.GetFilteredRepaymentSchedules(startDate, endDate);
+            var response = new
             {
-                RepaymentSchedule = new
+                RepaymentSchedules = result.RepaymentSchedules.Select(rs => new
                 {
-                    RepaymentDate = rs.RepaymentDate.ToString("yyyy/MM/dd"),
-                    rs.RepaymentAmount,
-                    rs.RepaymentStatus
-                },
-                LoanApplication = new
-                {
-                    rs.LoanApplicationID,
-                },
-                Customer = new
-                {
-                    rs.CustomerID,
-                    rs.FirstName
-                }
-            }).ToList();
-
-            var resultWithOutStatus = new
-            {
-                RepaymentSchedules = viewModelWithOutStatus,
-                AllCount = viewModelWithOutStatus.Count,
-                PaidCount = viewModelWithOutStatus.Count(v => v.RepaymentSchedule.RepaymentStatus == "Paid"),
-                UnpaidCount = viewModelWithOutStatus.Count(v => v.RepaymentSchedule.RepaymentStatus != "Paid")
+                    RepaymentSchedule = new
+                    {
+                        RepaymentDate = rs.RepaymentSchedule.RepaymentDate.ToString("yyyy/MM/dd"),
+                        rs.RepaymentSchedule.RepaymentAmount,
+                        rs.RepaymentSchedule.RepaymentStatus
+                    },
+                    LoanApplication = new
+                    {
+                        rs.LoanApplication.LoanApplicationID
+                    },
+                    Customer = new
+                    {
+                        rs.Customer.CustomerID,
+                        rs.Customer.FirstName
+                    }
+                }).ToList(),
+                result.AllCount,
+                result.PaidCount,
+                result.UnpaidCount
             };
 
-            return Json(resultWithOutStatus, JsonRequestBehavior.AllowGet);
+            return Json(response, JsonRequestBehavior.AllowGet);
         }
 
         //還款計劃狀態修改
@@ -418,38 +405,16 @@ namespace 專題Employee_Version1.Controllers
         //當日還款紀錄
         public ActionResult TransactionLogList()
         {
-            //今天的還款紀錄
-            var today = DateTime.Today;
-
-            var transactionLogs = _dbLoan3.TransactionLogs.AsNoTracking()
-                .Where(tl => DbFunctions.TruncateTime(tl.TransactionDate) == today)
-                .Select(tl => new TransactionLogViewModel
-                {
-                    RepaymentAccountNumber = tl.RepaymentAccount.AccountNumber,
-                    TransactionDate = tl.TransactionDate,
-                    Amount = tl.Amount
-                })
-                .ToList();
-
+            var transactionLogs = _loanQueryService.GetTodayTransactionLogs(DateTime.Today);
             return View(transactionLogs);
         }
 
         public ActionResult TransactionLogByAccountNumber(string accountNumber)
         {
-            var transactionLogs = _dbLoan3.TransactionLogs.AsNoTracking()
-                .Where(tl => tl.RepaymentAccount.AccountNumber == accountNumber)
-                .Select(tl => new TransactionLogViewModel
-                {
-                    RepaymentAccountNumber = tl.RepaymentAccount.AccountNumber,
-                    TransactionDate = tl.TransactionDate,
-                    Amount = tl.Amount,
-
-                })
-                .ToList();
-            ViewBag.AmountPaid = transactionLogs.Sum(tl => tl.Amount).ToString("N0");
-            ViewBag.RepaymentAccountNumber = accountNumber;
-
-            return View(transactionLogs);
+            var result = _loanQueryService.GetTransactionLogsByAccountNumber(accountNumber);
+            ViewBag.AmountPaid = result.AmountPaid.ToString("N0");
+            ViewBag.RepaymentAccountNumber = result.RepaymentAccountNumber;
+            return View(result.Logs);
         }
 
 

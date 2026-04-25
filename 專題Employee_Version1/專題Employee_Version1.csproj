@@ -853,7 +853,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\AzureBlobService.cs" />
     <Compile Include="services\CatService.cs" />
+    <Compile Include="services\LoanQueryService.cs" />
     <Compile Include="services\NewsService.cs" />
+    <Compile Include="services\TransactionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
