@@ -28,7 +28,7 @@ namespace 專題Employee_Version1.Controllers
 
         public ActionResult Index()
         {
-            var loanApplications = _dbLoan3.LoanApplications.ToList();
+            var loanApplications = _dbLoan3.LoanApplications.AsNoTracking().ToList();
             ViewBag.AllCount = loanApplications.Count;
             ViewBag.PendingCount = loanApplications.Count(x => x.LoanStatus == "Pending");
             ViewBag.ConfirmedCount = loanApplications.Count(x => x.LoanStatus == "Confirmed" || x.LoanStatus == "Rejected");
@@ -41,7 +41,7 @@ namespace 專題Employee_Version1.Controllers
         {
             var viewModel = new LoanViewModel
             {
-                LoanProducts = _dbLoan3.LoanProducts.ToList(),
+                LoanProducts = _dbLoan3.LoanProducts.AsNoTracking().ToList(),
                 NewLoanProductViewModel = new LoanProductViewModels
                 {
 
@@ -82,12 +82,20 @@ namespace 專題Employee_Version1.Controllers
             if (ModelState.IsValid)
             {
                 var file = loan.ImageFile;
-                var imagefileNames = loan.ImageFile.FileName;
+                var imagefileNames = file != null ? Path.GetFileName(file.FileName) : null;
 
                 if (file != null)
                 {
                     var path = Path.Combine(Server.MapPath("~/ImageFiles/"), imagefileNames);
                     file.SaveAs(path);
+                }
+
+                if (string.IsNullOrEmpty(imagefileNames))
+                {
+                    imagefileNames = _dbLoan3.LoanProducts
+                        .Where(x => x.LoanProductID == loan.LoanProductID)
+                        .Select(x => x.ImageFileName)
+                        .FirstOrDefault();
                 }
 
                 var loanProduct = new LoanProduct
@@ -103,6 +111,7 @@ namespace 專題Employee_Version1.Controllers
                 };
 
                 _dbLoan3.Entry(loanProduct).State = System.Data.Entity.EntityState.Modified;
+                _dbLoan3.SaveChanges();
                 return RedirectToAction("LoanList");
             }
             return View("LoanList");
@@ -179,21 +188,21 @@ namespace 專題Employee_Version1.Controllers
         //所有貸款申請
         public ActionResult AllLoanApplications()
         {
-            var loanApplications = _dbLoan3.LoanApplications.ToList();
+            var loanApplications = _dbLoan3.LoanApplications.AsNoTracking().ToList();
             return PartialView("_AllLoanApplications", loanApplications);
         }
 
         //待處理貸款申請
         public ActionResult PendingLoanApplications()
         {
-            var loanApplications = _dbLoan3.LoanApplications.Where(x => x.LoanStatus == "Pending").ToList();
+            var loanApplications = _dbLoan3.LoanApplications.AsNoTracking().Where(x => x.LoanStatus == "Pending").ToList();
             return PartialView("_PendingLoanApplications", loanApplications);
         }
 
         //已確認貸款申請
         public ActionResult ConfirmedLoanApplications()
         {
-            var loanApplications = _dbLoan3.LoanApplications.Where(x => x.LoanStatus == "Confirmed" || x.LoanStatus == "Rejected").ToList();
+            var loanApplications = _dbLoan3.LoanApplications.AsNoTracking().Where(x => x.LoanStatus == "Confirmed" || x.LoanStatus == "Rejected").ToList();
             return PartialView("_ConfirmedLoanApplications", loanApplications);
         }
 
@@ -335,17 +344,26 @@ namespace 專題Employee_Version1.Controllers
             startDate = startDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             endDate = endDate ?? startDate.Value.AddMonths(1).AddDays(-1);
 
-            var repaymentSchedules = _dbLoan3.RepaymentSchedules
+            var repaymentSchedules = _dbLoan3.RepaymentSchedules.AsNoTracking()
                 .Where(rs => (!startDate.HasValue || rs.RepaymentDate >= startDate.Value) &&
                              (!endDate.HasValue || rs.RepaymentDate <= endDate.Value))
                 .OrderBy(rs => rs.RepaymentDate)
+                .Select(rs => new
+                {
+                    rs.LoanApplicationID,
+                    rs.RepaymentDate,
+                    rs.RepaymentAmount,
+                    rs.RepaymentStatus,
+                    CustomerID = rs.LoanApplication.CustomerID,
+                    FirstName = rs.LoanApplication.CustomersInLoan.FirstName
+                })
                 .ToList();
 
             var viewModelWithOutStatus = repaymentSchedules.Select(rs => new
             {
                 RepaymentSchedule = new
                 {
-                    RepaymentDate = rs.RepaymentDate.ToString("yyyy/MM/dd"), // 將日期格式化為 MM/dd 格式
+                    RepaymentDate = rs.RepaymentDate.ToString("yyyy/MM/dd"),
                     rs.RepaymentAmount,
                     rs.RepaymentStatus
                 },
@@ -355,8 +373,8 @@ namespace 專題Employee_Version1.Controllers
                 },
                 Customer = new
                 {
-                    CustomerID = _dbLoan3.LoanApplications.FirstOrDefault(la => la.LoanApplicationID == rs.LoanApplicationID)?.CustomerID,
-                    FirstName = _dbLoan3.CustomersInLoans.FirstOrDefault(c => c.CustomerID == _dbLoan3.LoanApplications.FirstOrDefault(la => la.LoanApplicationID == rs.LoanApplicationID).CustomerID)?.FirstName
+                    rs.CustomerID,
+                    rs.FirstName
                 }
             }).ToList();
 
@@ -403,7 +421,7 @@ namespace 專題Employee_Version1.Controllers
             //今天的還款紀錄
             var today = DateTime.Today;
 
-            var transactionLogs = _dbLoan3.TransactionLogs
+            var transactionLogs = _dbLoan3.TransactionLogs.AsNoTracking()
                 .Where(tl => DbFunctions.TruncateTime(tl.TransactionDate) == today)
                 .Select(tl => new TransactionLogViewModel
                 {
@@ -418,7 +436,7 @@ namespace 專題Employee_Version1.Controllers
 
         public ActionResult TransactionLogByAccountNumber(string accountNumber)
         {
-            var transactionLogs = _dbLoan3.TransactionLogs
+            var transactionLogs = _dbLoan3.TransactionLogs.AsNoTracking()
                 .Where(tl => tl.RepaymentAccount.AccountNumber == accountNumber)
                 .Select(tl => new TransactionLogViewModel
                 {
