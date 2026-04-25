@@ -848,6 +848,7 @@
     <Compile Include="Models\ViewModels\LoanProductViewModels.cs" />
     <Compile Include="Models\ViewModels\LoanViewModel.cs" />
     <Compile Include="Models\ViewModels\MonthlyRepaymentPlanViewModel.cs" />
+    <Compile Include="Models\ServiceModels\LoanCommandModels.cs" />
     <Compile Include="Models\ServiceModels\LoanServiceModels.cs" />
     <Compile Include="Models\ServiceModels\TransactionServiceModels.cs" />
     <Compile Include="Models\ViewModels\TransactionLogViewModel.cs" />
@@ -855,6 +856,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\AzureBlobService.cs" />
     <Compile Include="services\CatService.cs" />
+    <Compile Include="services\LoanCommandService.cs" />
     <Compile Include="services\LoanQueryService.cs" />
     <Compile Include="services\NewsService.cs" />
     <Compile Include="services\TransactionService.cs" />
